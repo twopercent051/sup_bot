@@ -22,7 +22,7 @@ support_db - имя базы данных
 На этом, настройка конфига завершена. Можете просто сохранить и закрыть этот файл.
 """
 
-MSSQL = ['localhost:1433', 'sa', 'Stromabnehmer92', 'TestDB']
-TOKEN = '1341248158:AAH8AG5BGtfFpJG3dgMDTAiSSrEVJRU6jvY'
+MSSQL = ['localhost:1433', '', '', '']
+TOKEN = ''
 ADMIN_ID = '389929933'
 PROXY_URL = ''
