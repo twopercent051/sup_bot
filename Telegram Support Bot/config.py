@@ -23,6 +23,6 @@ support_db - имя базы данных
 """
 
 MSSQL = ['localhost:1433', 'sa', 'Stromabnehmer92', 'TestDB']
-TOKEN = '5717833580:AAG-18Q1Z_vNGa2ChFfozMA-bhCLqM5-zqk'
-ADMIN_ID = ''
+TOKEN = '1341248158:AAH8AG5BGtfFpJG3dgMDTAiSSrEVJRU6jvY'
+ADMIN_ID = '389929933'
 PROXY_URL = ''

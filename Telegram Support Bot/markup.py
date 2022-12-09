@@ -1,5 +1,5 @@
 from telebot import types
-from core_mssql import my_reqs, get_reqs, get_agents, get_passwords, get_files, get_icon_from_status, get_file_text
+from core_mssql import *
 
 
 def page(markup, number, list, call, callback_cancel):
@@ -93,10 +93,20 @@ def markup_reqs(user_id, callback, number):
     for req in reqs:
         req_id = req[0]
         req_status = req[1]
+        message_info = get_msg_info(req_id)
+        msg_text = str(message_info[0])
+        if len(msg_text) > 15:
+            msg_text = f'{msg_text[:15]}...'
+        source = message_info[1]
+        if user_status == 'agent':
+            req_username = req[2]
+        else:
+            req_username = ''
         req_icon = get_icon_from_status(req_status, user_status)
         #❗️, ⏳, ✅
 
-        item = types.InlineKeyboardButton(f'{req_icon} | ID: {req_id}', callback_data=f'open_req:{req_id}:{callback}-{number}')
+        item = types.InlineKeyboardButton(f'{req_icon} | ID: {req_id}  {source}  {msg_text}  {req_username}',
+                                          callback_data=f'open_req:{req_id}:{callback}-{number}')
         markup_my_reqs.add(item)
     
     markup_my_reqs = page(markup_my_reqs, number, reqs, callback, callback_cancel)

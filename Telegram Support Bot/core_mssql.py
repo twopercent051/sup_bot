@@ -38,12 +38,12 @@ def add_file(req_id, file_id, file_name, type):
 
 
 # Создать запрос
-def new_req(user_id, request, source):
+def new_req(user_id, request, source, username):
     con = pymssql.connect(db_server, db_user, db_password, db_title)
     cur = con.cursor()
 
     # Добавить запрос в БД
-    cur.execute(f"INSERT INTO requests VALUES (%s, %s)", (user_id, 'waiting'))
+    cur.execute(f"INSERT INTO requests VALUES (%s, %s, %s)", (user_id, username, 'waiting'))
 
     # Получить айди добавленного запроса
     req_id = cur.lastrowid
@@ -65,7 +65,7 @@ def new_req(user_id, request, source):
 
 
 # Добавить сообщение
-def add_message(req_id, message, user_status):
+def add_message(req_id, message, user_status, source):
     if user_status == 'user':
         req_status = 'waiting'
     elif user_status == 'agent':
@@ -78,7 +78,7 @@ def add_message(req_id, message, user_status):
     cur = con.cursor()
 
     # Добавить сообщение для запроса
-    cur.execute(f"INSERT INTO messages VALUES (%s, %s, %s, %s)", (req_id, message, user_status, date_now))
+    cur.execute(f"INSERT INTO messages VALUES (%s, %s, %s, %s, %s)", (req_id, message, source, user_status, date_now))
 
     # Изменить статус запроса
     cur.execute(f"UPDATE requests SET req_status = (%s) WHERE req_id = (%s)", (req_status, req_id))
@@ -350,7 +350,7 @@ def my_reqs(number, user_id):
     cur = con.cursor()
 
     cur.execute("""
-                SELECT req_id, req_status
+                SELECT req_id, req_status, username
                 FROM requests
                 WHERE user_id = (%s)
                 ORDER BY req_id DESC
@@ -374,7 +374,7 @@ def get_reqs(number, callback):
     cur = con.cursor()
 
     cur.execute("""
-            SELECT req_id, req_status
+            SELECT req_id, req_status, username
             FROM requests
             WHERE req_status = (%s)
             ORDER BY req_id DESC
@@ -388,6 +388,21 @@ def get_reqs(number, callback):
 
     return reqs
 
+def get_msg_info(req_id):
+    con = pymssql.connect(db_server, db_user, db_password, db_title)
+    cur = con.cursor()
+
+    cur.execute("""
+            SELECT message, source
+            FROM messages
+            WHERE req_id = (%s)
+            """, (req_id))
+    result = cur.fetchone()
+
+    cur.close()
+    con.close()
+
+    return result
 
 # Получить файлы по запросу с лимитом
 def get_files(number, req_id):

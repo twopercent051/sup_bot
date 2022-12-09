@@ -1,11 +1,20 @@
 import sys
-
+import logging
 import telebot
+import time
 from telebot import apihelper
 
 import config
 import core_mssql
 import markup
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format=u'%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s',
+)
+logger.info("Starting bot")
 
 if config.PROXY_URL:
     apihelper.proxy = {'https': config.PROXY_URL}
@@ -144,6 +153,7 @@ def get_agent_id_message(message):
 def get_new_request(message, source):
     request = message.text
     user_id = message.from_user.id
+    username = f'@{message.from_user.username}'
     check_file = core_mssql.get_file(message)
 
     # Если пользователь отправляет файл
@@ -163,7 +173,7 @@ def get_new_request(message, source):
             bot.register_next_step_handler(take_new_request, get_new_request, source)
 
         else:
-            req_id = core_mssql.new_req(user_id, request, source)
+            req_id = core_mssql.new_req(user_id, request, source, username)
             core_mssql.add_file(req_id, file_id, file_name, file_type)
 
             bot.send_message(message.chat.id,
@@ -188,7 +198,7 @@ def get_new_request(message, source):
             return
 
         else:
-            req_id = core_mssql.new_req(user_id, request, source)
+            req_id = core_mssql.new_req(user_id, request, source, username)
             bot.send_message(message.chat.id,
                              f'✅ Ваш запрос под ID {req_id} создан. Посмотреть текущие запросы можно нажав кнопку '
                              f'<b>Мои текущие запросы</b>',
@@ -225,7 +235,8 @@ def get_additional_message(message, req_id, status):
 
     else:
         if additional_message != 'None':
-            core_mssql.add_message(req_id, additional_message, status)
+            source = ''
+            core_mssql.add_message(req_id, additional_message, status, source)
 
         if check_file is not None:
             if additional_message != 'None':
@@ -599,4 +610,13 @@ def callback_inline(call):
 
 
 if __name__ == "__main__":
+
     bot.polling(none_stop=True)
+    # while True:
+    #     try:
+    #         logging.info("Bot running..")
+    #         bot.polling(none_stop=True, interval=2)
+    #     except Exception as e:
+    #         logging.error(e)
+    #         time.sleep(15)
+    #         logging.info("Running again!")

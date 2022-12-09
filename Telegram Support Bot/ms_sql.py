@@ -73,6 +73,7 @@ def create_table_requests():
         CREATE TABLE requests (
         req_id INT IDENTITY(1, 1) PRIMARY KEY,
         user_id VARCHAR(20),
+        username VARCHAR(50),
         req_status VARCHAR(20)
     )
     """)
